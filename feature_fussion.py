@@ -28,8 +28,13 @@ def feature_fussion_color_blocking(fn_basis, fn_modifier, params={'normalization
     
     return fn_fussed
 
-def feature_fussion_sum(fn_basis, fn_modifier):
+def feature_fussion_additive(fn_basis, fn_modifier):
     fn_fussed = fn_basis + fn_modifier
+    
+    return fn_fussed
+
+def feature_fussion_multiplicative(fn_basis, fn_modifier):
+    fn_fussed = fn_basis * fn_modifier
     
     return fn_fussed
 
@@ -91,9 +96,12 @@ def feature_fussion_power_gating_parameterization(fn_basis, params={'power': 1, 
 
 def feature_fusion_sigmoid_gating(fn_basis, fn_modifier, params={'k': 10.0, # gate sharpness
                                                                  'tau': 0.5, # confidence threshold
+                                                                 'discretization': False, 'sequence': [0.01, 0.25, 0.5, 0.75, 1],
                                                                  'normalization': True, 'scale': (0, 1)}):
     k = params.get('k', 10.0)
     tau = params.get('tau', 0.5)
+    discretization = params.get('discretization', False)
+    sequence = params.get('sequence', [0.01, 0.25, 0.5, 0.75, 1])
     normalization = params.get('normalization', True)
     scale = params.get('scale', (0, 1))
 
@@ -109,7 +117,8 @@ def feature_fusion_sigmoid_gating(fn_basis, fn_modifier, params={'k': 10.0, # ga
     # sigmoid confidence gate
     alpha = 1.0 / (1.0 + np.exp(-k * (fn_modifier - tau)))
     
-    alpha = map_to_nearest(alpha)
+    if discretization:
+        alpha = map_to_nearest(alpha, sequence)
     
     fn_fused = fn_basis * alpha
     return fn_fused
@@ -135,7 +144,7 @@ def feature_fussion_cluster_based(fn_basis, fn_modifier,
 def feature_fussion(fns_1, fns_2, params={}):
     fussion_type = params.get('fussion_type').lower()
     
-    fussion_type_valid = {'cluster', 'color_blocking', 'sum', 'power_gating', 'power_gating_parameterization', 'sigmoid_gating'}
+    fussion_type_valid = {'cluster', 'color_blocking', 'additive', 'multiplicative', 'power_gating', 'power_gating_parameterization', 'sigmoid_gating'}
     if fussion_type not in fussion_type_valid:
         raise ValueError(f"Invalid filter '{fussion_type}'. Allowed filters: {fussion_type_valid}")
     
@@ -144,8 +153,10 @@ def feature_fussion(fns_1, fns_2, params={}):
                                                                          params.get('dm_params'),
                                                                          params.get('cluster_params'),
                                                                          params.get('fussion_params'))
-    elif fussion_type == 'sum':
-        fn_fussed = feature_fussion_sum(fns_1, fns_2)
+    elif fussion_type == 'additive':
+        fn_fussed = feature_fussion_additive(fns_1, fns_2)
+    elif fussion_type == 'multiplicative':
+        fn_fussed = feature_fussion_multiplicative(fns_1, fns_2)
     elif fussion_type == 'color_blocking':
         fn_fussed = feature_fussion_color_blocking(fns_1, fns_2, params)
     elif fussion_type == 'power_gating':

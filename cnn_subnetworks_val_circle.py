@@ -356,7 +356,7 @@ def cnn_subnetworks_evaluation_circle_feature_fussion(feature_basis='pcc', featu
     # valid filters
     fussion_type = params.get('fussion_type', 'cluster')
     
-    fussion_type_valid = {'cluster', 'color_blocking', 'sum', 'power_gating', 'power_gating_parameterization', 'sigmoid_gating'}
+    fussion_type_valid = {'cluster', 'color_blocking', 'additive', 'multiplicative', 'power_gating', 'power_gating_parameterization', 'sigmoid_gating'}
     if fussion_type not in fussion_type_valid:
         raise ValueError(f"Invalid filter '{fussion_type}'. Allowed filters: {fussion_type_valid}")
     
@@ -537,7 +537,6 @@ def normal_evaluation_framework():
     
     # selection rates
     selection_rate_list = [1.0, 0.75, 0.5, 0.3, 0.2, 0.1, 0.05]
-    selection_rate_list = [0.5, 0.3, 0.2, 0.1]
     for selection_rate in selection_rate_list:
         #-----------------------------------------------------------------------
         # # original functional connectivity networks
@@ -600,47 +599,29 @@ def normal_evaluation_framework():
         #                                                   save=True)
         
         # cnn_subnetworks_evaluation_circle_feature_fussion(feature_basis='pcc', feature_modifier='plv', 
-        #                                                   params={'fussion_type': 'power_gating_parameterization', 
-        #                                                           'power': 1,
+        #                                                   params={'fussion_type': 'sigmoid_gating', 
+        #                                                           'k': 20, 'tau': 0.2,
+        #                                                           'discretization': False, 
+        #                                                           'sequence': [0.01, 0.25, 0.5, 0.75, 1],
         #                                                           'normalization': True},
         #                                                   subject_range=range(6,16), experiment_range=range(1,4),
         #                                                   subnetworks_extract='separate_index', selection_rate=selection_rate,
         #                                                   subnets_exrtact_basis_sub=range(1,6), subnets_exrtact_basis_ex=range(1,4),
         #                                                   save=True)
         
-        cnn_subnetworks_evaluation_circle_feature_fussion(feature_basis='pcc', feature_modifier='plv', 
-                                                          params={'fussion_type': 'sigmoid_gating', 
-                                                                  'k': 100, 'tau': 0.2,
-                                                                  'normalization': True},
-                                                          subject_range=range(6,16), experiment_range=range(1,4),
-                                                          subnetworks_extract='separate_index', selection_rate=selection_rate,
-                                                          subnets_exrtact_basis_sub=range(1,6), subnets_exrtact_basis_ex=range(1,4),
-                                                          save=True)
-        
-        cnn_subnetworks_evaluation_circle_feature_fussion(feature_basis='pcc', feature_modifier='plv', 
-                                                          params={'fussion_type': 'sigmoid_gating', 
-                                                                  'k': 100, 'tau': 0.3,
-                                                                  'normalization': True},
-                                                          subject_range=range(6,16), experiment_range=range(1,4),
-                                                          subnetworks_extract='separate_index', selection_rate=selection_rate,
-                                                          subnets_exrtact_basis_sub=range(1,6), subnets_exrtact_basis_ex=range(1,4),
-                                                          save=True)
-        
-        cnn_subnetworks_evaluation_circle_feature_fussion(feature_basis='pcc', feature_modifier='plv', 
-                                                          params={'fussion_type': 'sigmoid_gating', 
-                                                                  'k': 100, 'tau': 0.5,
-                                                                  'normalization': True},
-                                                          subject_range=range(6,16), experiment_range=range(1,4),
-                                                          subnetworks_extract='separate_index', selection_rate=selection_rate,
-                                                          subnets_exrtact_basis_sub=range(1,6), subnets_exrtact_basis_ex=range(1,4),
-                                                          save=True)
-        
         # cnn_subnetworks_evaluation_circle_feature_fussion(feature_basis='pcc', feature_modifier='plv', 
-        #                                                   params={'fussion_type': 'sum'},
+        #                                                   params={'fussion_type': 'additive'},
         #                                                   subject_range=range(6,16), experiment_range=range(1,4),
         #                                                   subnetworks_extract='unify_index', selection_rate=selection_rate,
         #                                                   subnets_exrtact_basis_sub=range(1,6), subnets_exrtact_basis_ex=range(1,4),
         #                                                   save=True)
+        
+        cnn_subnetworks_evaluation_circle_feature_fussion(feature_basis='pcc', feature_modifier='plv', 
+                                                          params={'fussion_type': 'multiplicative'},
+                                                          subject_range=range(6,16), experiment_range=range(1,4),
+                                                          subnetworks_extract='unify_index', selection_rate=selection_rate,
+                                                          subnets_exrtact_basis_sub=range(1,6), subnets_exrtact_basis_ex=range(1,4),
+                                                          save=True)
         
         # cnn_subnetworks_evaluation_circle_feature_fussion(feature_basis='pcc', feature_modifier='plv',
         #                                                   params={'fussion_type': 'color_blocking', 'normalization': False},
@@ -653,4 +634,4 @@ if __name__ == '__main__':
     normal_evaluation_framework()
     
     # %% End
-    end_program_actions(play_sound=True, shutdown=True, countdown_seconds=120)
+    end_program_actions(play_sound=True, shutdown=False, countdown_seconds=120)
