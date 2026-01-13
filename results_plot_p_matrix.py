@@ -604,7 +604,7 @@ def plot_p_p_heatmap(
 # %% ANOVA
 import pandas as pd
 from statsmodels.stats.anova import AnovaRM
-def anova_repeated_measures(df_1, df_2):
+def anova_repeated_measures_pairwise(df_1, df_2):
     def prepare_rm_anova_df(df, method_name, srs_order):
         s = len(srs_order)
         n = len(df) // s
@@ -619,8 +619,8 @@ def anova_repeated_measures(df_1, df_2):
     
     srs_order = df_1['srs'].unique()
     
-    df_1_rm = prepare_rm_anova_df(df_1, 'PCC', srs_order)
-    df_2_rm = prepare_rm_anova_df(df_2, 'PLV', srs_order)
+    df_1_rm = prepare_rm_anova_df(df_1, 'df1', srs_order)
+    df_2_rm = prepare_rm_anova_df(df_2, 'df2', srs_order)
     
     df_all = pd.concat([df_1_rm, df_2_rm], ignore_index=True)
     
@@ -634,7 +634,42 @@ def anova_repeated_measures(df_1, df_2):
     print(aov)
     
     return aov
+
+def anova_repeated_measures(dfs):
+    def prepare_rm_anova_df(df, method_name, srs_order):
+        s = len(srs_order)
+        n = len(df) // s
     
+        out = df.copy()
+        out['method'] = method_name
+        out['run'] = (
+            out.index // s
+        ) + 1
+    
+        return out[['run', 'method', 'srs', 'data']]
+    
+    srs_order = df_1['srs'].unique()
+    
+    df_all = []
+    for df in dfs:
+        df_rm = prepare_rm_anova_df(df, 'PCC', srs_order)
+    
+    df_1_rm = prepare_rm_anova_df(df_1, '1', srs_order)
+    df_2_rm = prepare_rm_anova_df(df_2, '2', srs_order)
+    
+    df_all = pd.concat([df_1_rm, df_2_rm], ignore_index=True)
+    
+    aov = AnovaRM(
+    df_all,
+    depvar='data',
+    subject='run',
+    within=['method', 'srs']
+    ).fit()
+    
+    print(aov)
+    
+    return aov
+
 # %% main
 if __name__ == "__main__":    
     # plot_comparison()
@@ -662,7 +697,7 @@ if __name__ == "__main__":
                 anova_matrix_2[i, j] = None
                 anova_matrix_3[i, j] = None
             else:
-                anova_table = anova_repeated_measures(df_1, df_2).anova_table
+                anova_table = anova_repeated_measures_pairwise(df_1, df_2).anova_table
                 anova_matrix_1[i, j] = anova_table['Pr > F'][0]
                 anova_matrix_2[i, j] = anova_table['Pr > F'][1]
                 anova_matrix_3[i, j] = anova_table['Pr > F'][2]
