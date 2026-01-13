@@ -11,7 +11,7 @@ class data:
         self.accuracy = accuracy
         self.f1score = f1score
 
-# %% minimalist_data
+# %% minimalist_data; "srs": [1, 0.5, 0.3, 0.2, 0.1, 0.05]
 minimalist_accuracy = {
     "identifier": (
         ["Baseline: Original PCC"] * 5
@@ -129,7 +129,7 @@ partia_f1score = {
 
 partia_data = data("partia_data", partia_accuracy, partia_f1score)
 
-# %% summary_data
+# %% summary_data; "srs": [1, 0.75, 0.5, 0.3, 0.2, 0.1, 0.05]
 summary_accuracy = {
     "identifier": (
         ["Baseline: Original FN, PCC"] * 7

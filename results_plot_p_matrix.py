@@ -55,7 +55,7 @@ def mbpe_for_data(data_dict):
 
 # %% P-Matrices
 from scipy.stats import ttest_ind, ttest_rel
-def compare_methods(data, alpha=0.05):
+def compare_methods(data):
     methods = list(data.keys())
     n = len(methods)
 
@@ -636,34 +636,26 @@ def anova_repeated_measures_pairwise(df_1, df_2):
     return aov
 
 def anova_repeated_measures(dfs):
-    def prepare_rm_anova_df(df, method_name, srs_order):
+    def prepare_rm_anova_df(df, srs_order):
         s = len(srs_order)
-        n = len(df) // s
     
         out = df.copy()
-        out['method'] = method_name
-        out['run'] = (
-            out.index // s
-        ) + 1
+        out['run'] = (out.index // s) + 1
     
-        return out[['run', 'method', 'srs', 'data']]
+        return out
     
-    srs_order = df_1['srs'].unique()
+    srs_order = dfs[0]['srs'].unique()
     
-    df_all = []
-    for df in dfs:
-        df_rm = prepare_rm_anova_df(df, 'PCC', srs_order)
-    
-    df_1_rm = prepare_rm_anova_df(df_1, '1', srs_order)
-    df_2_rm = prepare_rm_anova_df(df_2, '2', srs_order)
-    
-    df_all = pd.concat([df_1_rm, df_2_rm], ignore_index=True)
+    df_all = pd.DataFrame([])
+    for i, df in enumerate(dfs):
+        df_rm = prepare_rm_anova_df(df, srs_order)
+        df_all = pd.concat([df_all, df_rm], ignore_index=True)
     
     aov = AnovaRM(
     df_all,
     depvar='data',
     subject='run',
-    within=['method', 'srs']
+    within=['identifier', 'srs']
     ).fit()
     
     print(aov)
@@ -672,7 +664,7 @@ def anova_repeated_measures(dfs):
 
 # %% main
 if __name__ == "__main__":    
-    # plot_comparison()
+    # data
     from results_append import accuracy_original_pcc, accuracy_original_plv
     df_pcc = pd.DataFrame(accuracy_original_pcc)
     df_plv = pd.DataFrame(accuracy_original_plv)
@@ -685,32 +677,102 @@ if __name__ == "__main__":
     from results_append import accuracy_pgac
     df_pgac = pd.DataFrame(accuracy_pgac)
     
+    # rm anova
     data_list = [df_pcc, df_plv, df_addictive, df_multiplicative, df_splicing, df_pgac]
+    rm_anova = anova_repeated_measures(data_list).anova_table
     
-    anova_matrix_1 = np.zeros([len(data_list), len(data_list)])
-    anova_matrix_2 = np.zeros([len(data_list), len(data_list)])
-    anova_matrix_3 = np.zeros([len(data_list), len(data_list)])
-    for i, df_1 in enumerate(data_list):
-        for j, df_2 in enumerate(data_list):
-            if df_1.identifier.unique() == df_2.identifier.unique():
-                anova_matrix_1[i, j] = None
-                anova_matrix_2[i, j] = None
-                anova_matrix_3[i, j] = None
-            else:
-                anova_table = anova_repeated_measures_pairwise(df_1, df_2).anova_table
-                anova_matrix_1[i, j] = anova_table['Pr > F'][0]
-                anova_matrix_2[i, j] = anova_table['Pr > F'][1]
-                anova_matrix_3[i, j] = anova_table['Pr > F'][2]
+    # NRR = 0.5
+    df_pcc_ = df_pcc.loc[df_pcc['srs'] == 0.5]
+    df_plv_ = df_plv.loc[df_plv['srs'] == 0.5]
     
-    anova_matrix_1 = pd.DataFrame(anova_matrix_1)
-    anova_matrix_2 = pd.DataFrame(anova_matrix_2)
-    anova_matrix_3 = pd.DataFrame(anova_matrix_3)
-    identifier_list = [df_pcc.identifier.unique()[0], df_plv.identifier.unique()[0], 
-                       df_addictive.identifier.unique()[0], df_multiplicative.identifier.unique()[0], df_splicing.identifier.unique()[0], 
-                       df_pgac.identifier.unique()[0]]
-    anova_matrix_1.columns, anova_matrix_1.index = identifier_list, identifier_list
-    anova_matrix_2.columns, anova_matrix_2.index = identifier_list, identifier_list
-    anova_matrix_3.columns, anova_matrix_3.index = identifier_list, identifier_list
+    df_addictive_ = df_addictive.loc[df_addictive['srs'] == 0.5]
+    df_multiplicative_ = df_multiplicative.loc[df_multiplicative['srs'] == 0.5]
+    df_splicing_ = df_splicing.loc[df_splicing['srs'] == 0.5]
     
-    plot_p_p_heatmap(anova_matrix_1, anova_matrix_3, cmap_p1='Oranges', cmap_p2='Purples')
-    # plot_p_p_heatmap(anova_matrix_3, anova_matrix_3)
+    df_pgac_ = df_pgac.loc[df_pgac['srs'] == 0.5]
+    
+    data = {df_pcc_['identifier'].unique().item(): df_pcc_['data'],
+            df_plv_['identifier'].unique().item(): df_plv_['data'],
+               
+            df_addictive_['identifier'].unique().item(): df_addictive_['data'],
+            df_multiplicative_['identifier'].unique().item(): df_multiplicative_['data'],
+            df_splicing_['identifier'].unique().item(): df_splicing_['data'],
+               
+            df_pgac_['identifier'].unique().item(): df_pgac_['data']}
+    
+    df_mean_diff, df_relative_gain, df_p_matrix, df_paired_p_matrix, df_effect_size = compare_methods(data)
+    
+    # plot_rel_e_heatmap(df_effect_size, -df_relative_gain, 'Effective Size vs. Relative Gain under NRR=0.5')
+    plot_diff_p_heatmap(df_paired_p_matrix, -df_mean_diff, 'Mean Difference vs. Paired t Test under NRR=0.5')
+    
+    # NRR = 0.3
+    df_pcc_ = df_pcc.loc[df_pcc['srs'] == 0.3]
+    df_plv_ = df_plv.loc[df_plv['srs'] == 0.3]
+    
+    df_addictive_ = df_addictive.loc[df_addictive['srs'] == 0.3]
+    df_multiplicative_ = df_multiplicative.loc[df_multiplicative['srs'] == 0.3]
+    df_splicing_ = df_splicing.loc[df_splicing['srs'] == 0.3]
+    
+    df_pgac_ = df_pgac.loc[df_pgac['srs'] == 0.3]
+    
+    data = {df_pcc_['identifier'].unique().item(): df_pcc_['data'],
+            df_plv_['identifier'].unique().item(): df_plv_['data'],
+               
+            df_addictive_['identifier'].unique().item(): df_addictive_['data'],
+            df_multiplicative_['identifier'].unique().item(): df_multiplicative_['data'],
+            df_splicing_['identifier'].unique().item(): df_splicing_['data'],
+               
+            df_pgac_['identifier'].unique().item(): df_pgac_['data']}
+    
+    df_mean_diff, df_relative_gain, df_p_matrix, df_paired_p_matrix, df_effect_size = compare_methods(data)
+    
+    # plot_rel_e_heatmap(df_effect_size, -df_relative_gain, 'Effective Size vs. Relative Gain under NRR=0.3')
+    plot_diff_p_heatmap(df_paired_p_matrix, -df_mean_diff, 'Mean Difference vs. Paired t Test under NRR=0.3')
+    
+    # NRR = 0.2
+    df_pcc_ = df_pcc.loc[df_pcc['srs'] == 0.2]
+    df_plv_ = df_plv.loc[df_plv['srs'] == 0.2]
+    
+    df_addictive_ = df_addictive.loc[df_addictive['srs'] == 0.2]
+    df_multiplicative_ = df_multiplicative.loc[df_multiplicative['srs'] == 0.2]
+    df_splicing_ = df_splicing.loc[df_splicing['srs'] == 0.2]
+    
+    df_pgac_ = df_pgac.loc[df_pgac['srs'] == 0.2]
+    
+    data = {df_pcc_['identifier'].unique().item(): df_pcc_['data'],
+            df_plv_['identifier'].unique().item(): df_plv_['data'],
+               
+            df_addictive_['identifier'].unique().item(): df_addictive_['data'],
+            df_multiplicative_['identifier'].unique().item(): df_multiplicative_['data'],
+            df_splicing_['identifier'].unique().item(): df_splicing_['data'],
+               
+            df_pgac_['identifier'].unique().item(): df_pgac_['data']}
+    
+    df_mean_diff, df_relative_gain, df_p_matrix, df_paired_p_matrix, df_effect_size = compare_methods(data)
+    
+    # plot_rel_e_heatmap(df_effect_size, -df_relative_gain, 'Effective Size vs. Relative Gain under NRR=0.2')
+    plot_diff_p_heatmap(df_paired_p_matrix, -df_mean_diff, 'Mean Difference vs. Paired t Test under NRR=0.2')
+    
+    # NRR = 0.1
+    df_pcc_ = df_pcc.loc[df_pcc['srs'] == 0.1]
+    df_plv_ = df_plv.loc[df_plv['srs'] == 0.1]
+    
+    df_addictive_ = df_addictive.loc[df_addictive['srs'] == 0.1]
+    df_multiplicative_ = df_multiplicative.loc[df_multiplicative['srs'] == 0.1]
+    df_splicing_ = df_splicing.loc[df_splicing['srs'] == 0.1]
+    
+    df_pgac_ = df_pgac.loc[df_pgac['srs'] == 0.1]
+    
+    data = {df_pcc_['identifier'].unique().item(): df_pcc_['data'],
+            df_plv_['identifier'].unique().item(): df_plv_['data'],
+               
+            df_addictive_['identifier'].unique().item(): df_addictive_['data'],
+            df_multiplicative_['identifier'].unique().item(): df_multiplicative_['data'],
+            df_splicing_['identifier'].unique().item(): df_splicing_['data'],
+               
+            df_pgac_['identifier'].unique().item(): df_pgac_['data']}
+    
+    df_mean_diff, df_relative_gain, df_p_matrix, df_paired_p_matrix, df_effect_size = compare_methods(data)
+    
+    # plot_rel_e_heatmap(df_effect_size, -df_relative_gain, 'Effective Size vs. Relative Gain under NRR=0.1')
+    plot_diff_p_heatmap(df_paired_p_matrix, -df_mean_diff, 'Mean Difference vs. Paired t Test under NRR=0.1')

@@ -503,19 +503,12 @@ def mbpe_comperhensive(compact_data=None):
     return df_augmented
 
 # %% main
-if __name__ == "__main__":
-    # from results_summary import partia_data
-    # # partia
-    # accuracy, f1score = accuracy_comperhensive(partia_data)
-    # df_auc = auc_comperhensive(partia_data)
-    # # df_sbpe = sbpe_comperhensive(partia_data)
-    # # df_mbpe = mbpe_comperhensive(partia_data)
-    
+if __name__ == "__main__":    
     from results_summary import minimalist_data
     # minimalist
     accuracy, f1score = accuracy_comperhensive(minimalist_data)
-    df_auc = auc_comperhensive(minimalist_data)
     compact_bars(minimalist_data)
+    df_auc = auc_comperhensive(minimalist_data)
     # df_sbpe = sbpe_comperhensive(minimalist_data)
     # df_mbpe = mbpe_comperhensive(minimalist_data)
     
