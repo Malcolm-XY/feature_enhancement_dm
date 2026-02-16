@@ -46,7 +46,7 @@ def matrix_plot(accuracy_data, lambda_values, sigma_values, fontsize=12):
 
         ax.tick_params(axis='x', labelsize=fontsize * 0.8)
         ax.tick_params(axis='y', labelsize=fontsize * 0.8)
-        ax.set_title(f'NRR, n={sr.split("=")[1]}', fontsize=fontsize + 2)
+        ax.set_title(f'{sr}', fontsize=fontsize + 2)
 
         ax.invert_yaxis()
 
@@ -115,25 +115,25 @@ tau_values = np.array([0.2, 0.3, 0.5])
 
 # accuracy_data 略，保持原样
 accuracy_data_pcc = {
-    "n (NRR)=50%": np.array([
+    "NRR=0.5": np.array([
         [91.32, 91.49, 90.88],
         [91.84, 91.50, 90.50],
         [92.04, 91.88, 91.15],
         [91.99, 91.58, 91.06],
     ]),
-    "n (NRR)=30%": np.array([
+    "NRR=0.3": np.array([
         [85.30, 85.29, 86.13],
         [86.25, 87.09, 87.14],
         [86.96, 86.91, 87.26],
         [88.45, 88.41, 87.81],
     ]),
-    "n (NRR)=20%": np.array([
+    "NRR=0.2": np.array([
         [74.74, 75.67, 75.85],
         [79.49, 78.76, 79.96],
         [81.39, 81.92, 79.71],
         [82.32, 82.75, 79.19],
     ]),
-    "n (NRR)=10%": np.array([
+    "NRR=0.1": np.array([
         [59.48, 59.41, 59.00],
         [59.70, 62.06, 59.42],
         [60.03, 62.21, 62.45],
