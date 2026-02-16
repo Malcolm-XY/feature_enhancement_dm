@@ -194,8 +194,7 @@ def plot_rel_e_heatmap(
         ax=ax,
         cbar=True,
         cbar_ax=cax_eff,
-        cbar_kws={"label": "Effect Size (col − row)",
-                  "orientation": "horizontal"}
+        cbar_kws={"label": "Effect Size (col − row)", "orientation": "horizontal"}
     )
 
     # —— 文本标注 —— 
@@ -343,7 +342,8 @@ def plot_diff_p_heatmap(
         ax=ax,
         cbar=True,
         cbar_ax=cax_diff,
-        cbar_kws={"label": "Mean Difference Δ (row − col)"}
+        # cbar_kws={"label": "Mean Difference Δ (row − col)"},
+        cbar_kws={"label": "Mean Difference Δ (col - row)"},
     )
 
     # —— 下三角 ——
