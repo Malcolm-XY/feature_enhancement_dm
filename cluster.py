@@ -198,7 +198,7 @@ if __name__ == '__main__':
     from utils import utils_visualization
     # cluster
     electrodes, dm = feature_engineering.compute_distance_matrix('seed', projection_params={'source': 'auto', 'type': '3d_euclidean'})
-    clusters, parsed_clusters = hierarchical_clustering(dm, 70, electrodes, parse=True, verbose=True)
+    clusters, parsed_clusters = hierarchical_clustering(dm, 100, electrodes, parse=True, verbose=True)
     
     distribution = utils_feature_loading.read_distribution('seed')
     
@@ -209,6 +209,7 @@ if __name__ == '__main__':
     inter_cluster_mask = construct_inter_cluster_mask(clusters['cluster_idx'])
     utils_visualization.draw_projection(inter_cluster_mask)
     
+    # example
     example_pcc = utils_feature_loading.read_fcs('seed', 'sub1ex1', 'pcc')['alpha']
     example_plv = utils_feature_loading.read_fcs('seed', 'sub1ex1', 'plv')['alpha']
     
@@ -221,6 +222,7 @@ if __name__ == '__main__':
     utils_visualization.draw_projection(fn_modifier[0], "plv'")
     utils_visualization.draw_projection(fn[0], 'pcc & plv')
     
+    # average
     avg_pcc = utils_feature_loading.read_fcs_global_average('seed', 'pcc')['alpha']
     avg_plv = utils_feature_loading.read_fcs_global_average('seed', 'plv')['alpha']
     
