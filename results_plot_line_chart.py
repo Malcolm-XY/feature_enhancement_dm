@@ -406,7 +406,7 @@ def auc_comperhensive(compact_data=None):
               mode="ci", n=30, 
               color_bar="auto", cmap=cmap,
               ylabel="AUC (Area Under the Curve) (%)", xlabel="FN Recovery Methods",
-              xtick_rotation=30, wrap_width=30, figsize=(10,10), lower_limit=70, hatchs=hatchs)
+              xtick_rotation=30, wrap_width=30, figsize=(10,9), lower_limit=70, hatchs=hatchs)
     
     return df_augmented
 

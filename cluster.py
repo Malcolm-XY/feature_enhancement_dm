@@ -198,7 +198,7 @@ if __name__ == '__main__':
     from utils import utils_visualization
     # cluster
     electrodes, dm = feature_engineering.compute_distance_matrix('seed', projection_params={'source': 'auto', 'type': '3d_euclidean'})
-    clusters, parsed_clusters = hierarchical_clustering(dm, 100, electrodes, parse=True, verbose=True)
+    clusters, parsed_clusters = hierarchical_clustering(dm, None, electrodes, parse=True, verbose=True)
     
     distribution = utils_feature_loading.read_distribution('seed')
     
